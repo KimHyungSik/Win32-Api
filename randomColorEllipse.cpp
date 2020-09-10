@@ -1,8 +1,12 @@
-﻿// Timer02.cpp : 애플리케이션에 대한 진입점을 정의합니다.
+// Timer02.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
 #include "framework.h"
 #include "Timer02.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 
 #define MAX_LOADSTRING 100
 
@@ -126,6 +130,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
     static int x, y;
     static RECT rect;
     static int R_L = 1, B_T = 1;
+    static HBRUSH h_brush, original_brush;
 
     switch (message)
     {
@@ -150,12 +155,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
     case WM_CREATE:
         x = 20;
         y = 20;
+        srand(time(NULL));
         SetTimer(hWnd, 1, 50, NULL);
-        SetTimer(hWnd, 2, 50, NULL);
-        SetTimer(hWnd, 3, 50, NULL);
+        
         SetTimer(hWnd, 4, 50, NULL);
+       
         break;
-
+    // 키로조정 
     //case WM_KEYDOWN:
     //    if (wParam == VK_RIGHT) {
     //        KillTimer(hWnd, 2);
@@ -178,44 +184,52 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
         GetClientRect(hWnd, &rect);
         switch (wParam) {
             case 1:
-                if (x + 5 <= rect.right-20 && R_L)
-                    x += 5;
+                if (x + 20 <= rect.right-20)
+                    x += 20;
                 else {
-                    R_L = false;
+                    KillTimer(hWnd, 1);
+                    SetTimer(hWnd, 2, 50, NULL);
+                    h_brush = CreateSolidBrush(RGB(rand() % 256, rand() % 256, rand() % 256));
                 }
                 break;
 
             case 2:
-                if (x - 5 >= rect.left + 20 && !R_L) 
-                    x -= 5;
+                if (x - 20 >= rect.left + 20) 
+                    x -= 20;
                 else {
-                    R_L = true;
+                    KillTimer(hWnd, 2);
+                    SetTimer(hWnd, 1, 50, NULL);
+                    h_brush = CreateSolidBrush(RGB(rand() % 256, rand() % 256, rand() % 256));
                 }
                 break;
 
             case 3:
-                if (y - 5 >= rect.top + 20 && B_T)
-                    y -= 5;
+                if (y - 20 >= rect.top + 20)
+                    y -= 20;
                 else {
-                    B_T = false;
+                    KillTimer(hWnd, 3);
+                    SetTimer(hWnd, 4, 50, NULL);
+                    h_brush = CreateSolidBrush(RGB(rand() % 256, rand() % 256, rand() % 256));
                 }
                 break;
 
             case 4:
-                if (y + 5 <= rect.bottom - 20 && !B_T)
-                    y += 5;
+                if (y + 20 <= rect.bottom - 20)
+                    y += 20;
                 else {
-                    B_T = true;
+                    KillTimer(hWnd, 4);
+                    SetTimer(hWnd, 3, 50, NULL);
+                    h_brush = CreateSolidBrush(RGB(rand() % 256, rand() % 256, rand() % 256));
                 }
                 break;
 
         }
         InvalidateRgn(hWnd, NULL, TRUE);
         break;
-    case WM_PAINT:
-        {
+    case WM_PAINT:{
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
+            if(h_brush) SelectObject(hdc, h_brush);
             Ellipse(hdc, x - 20, y - 20, x + 20, y + 20);
             EndPaint(hWnd, &ps);
         }
