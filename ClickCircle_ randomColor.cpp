@@ -1,9 +1,12 @@
-﻿// ClickCircle.cpp : 애플리케이션에 대한 진입점을 정의합니다.
+// ClickCircle.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
 #include "framework.h"
 #include "ClickCircle.h"
 #include <Math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
@@ -130,7 +133,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static int x, y;
     static bool isClick = false;
-    static HBRUSH oldBrush, hBrush;
+    static HBRUSH hBrush;
+    static HPEN hPen;
 
     switch (message)
     {
@@ -157,6 +161,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             x = LOWORD(lParam);
             y = HIWORD(lParam);
             isClick = true;
+
+            hBrush = CreateSolidBrush(RGB(rand() % 256, rand() % 256, rand() % 256));
+            hPen = CreatePen(PS_SOLID, 1, RGB(rand() % 256, rand() % 256, rand() % 256));
+
         }
         break;
 
@@ -169,24 +177,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_LBUTTONUP:
+        if (isClick) {
         isClick = false;
+        }
         InvalidateRgn(hWnd, NULL, TRUE);
         break;
 
     case WM_CREATE:
         x = 40;
         y = 40;
+        srand(time(NULL));
         break;
 
     case WM_PAINT:{
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             if (isClick) {
-                hBrush = CreateSolidBrush(RGB(255, 0, 0));
-                oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+                SelectObject(hdc, hBrush);
+                SelectObject(hdc, hPen);
                 Ellipse(hdc, x - CSize, y - CSize, x + CSize, y + CSize);
-                SelectObject(hdc, oldBrush);
-                DeleteObject(hBrush);
             }else {
                 Ellipse(hdc, x - CSize, y - CSize, x + CSize, y + CSize);
             }
